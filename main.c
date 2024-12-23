@@ -1,5 +1,14 @@
 #include <vulkan/vulkan.h>
 #include <stdio.h>
+#include <stdlib.h>
+
+void c_printVulkanVersion(uint32_t c_ApiVersion) {
+    int c_ApiVersionVariant = VK_API_VERSION_VARIANT(c_ApiVersion);
+    int c_ApiVersionMajor = VK_API_VERSION_MAJOR(c_ApiVersion);
+    int c_ApiVersionMinor = VK_API_VERSION_MINOR(c_ApiVersion);
+    int c_ApiVersionPatch = VK_API_VERSION_PATCH(c_ApiVersion);  
+    printf("%d.%d.%d", c_ApiVersionMajor, c_ApiVersionMinor, c_ApiVersionPatch);
+}
 
 int main()
 {
@@ -10,14 +19,16 @@ int main()
 
 
     VkResult vkRes;
+    VkInstance vkIns;
 
 
 
-
-    // Get Vulkan Version
+    // Get vulkan version
     uint32_t c_ApiVersion;
     vkRes = vkEnumerateInstanceVersion(&c_ApiVersion);
-    if ( vkRes == VK_ERROR_OUT_OF_HOST_MEMORY ) { printf("[ERR][VER] OoM\n");}
+    if ( vkRes != VK_SUCCESS){
+        if ( vkRes == VK_ERROR_OUT_OF_HOST_MEMORY ) { printf("[ERR][VER] out of host memory\n");}
+    }
     
     // Note:
     // https://docs.vulkan.org/spec/latest/chapters/extensions.html#extendingvulkan-conversion-versionnumbers
@@ -32,14 +43,66 @@ int main()
     int c_ApiVersionMinor = VK_API_VERSION_MINOR(c_ApiVersion);
     int c_ApiVersionPatch = VK_API_VERSION_PATCH(c_ApiVersion);
 
-    printf("API version number: %d\n", c_ApiVersion);
-    printf("API variant: %d\n", c_ApiVersionVariant);
-    printf("API major: %d\n", c_ApiVersionMajor);
-    printf("API minor: %d\n", c_ApiVersionMinor);
-    printf("API patch: %d\n", c_ApiVersionPatch);
+    printf("[Vulkan API version]\n");
+    printf("Version number: %d\n", c_ApiVersion);
+    printf("Version string: "); c_printVulkanVersion(c_ApiVersion); printf("\n");
+    printf("Variant: %d\n", c_ApiVersionVariant);
+    printf("Major: %d\n", c_ApiVersionMajor);
+    printf("Minor: %d\n", c_ApiVersionMinor);
+    printf("Patch: %d\n", c_ApiVersionPatch);
+    printf("\n");
+    printf("\n");
     printf("\n");
 
   
+
+
+
+
+    // Get vulkan layers
+    // Note:
+    // https://docs.vulkan.org/spec/latest/chapters/extensions.html#extendingvulkan-layers
+    uint32_t c_PropertyCount;
+    vkRes = vkEnumerateInstanceLayerProperties(&c_PropertyCount,NULL);
+    if ( vkRes != VK_SUCCESS ) {
+        if ( vkRes == VK_INCOMPLETE) { printf("[ERR][PROP.0] incomplete\n");}
+        if ( vkRes == VK_ERROR_OUT_OF_HOST_MEMORY) { printf("[ERR][PROP.0] out of host memory\n");}
+        if ( vkRes == VK_ERROR_OUT_OF_DEVICE_MEMORY) { printf("[ERR][PROP.0] out of device memory\n");}
+    }
+    VkLayerProperties* c_VkLayerProperties = (VkLayerProperties*) malloc(sizeof(VkLayerProperties)*c_PropertyCount);
+    vkRes = vkEnumerateInstanceLayerProperties(&c_PropertyCount,c_VkLayerProperties);
+    if ( vkRes != VK_SUCCESS ) {
+        if ( vkRes == VK_INCOMPLETE) { printf("[ERR][PROP.0] incomplete\n");}
+        if ( vkRes == VK_ERROR_OUT_OF_HOST_MEMORY) { printf("[ERR][PROP.0] out of host memory\n");}
+        if ( vkRes == VK_ERROR_OUT_OF_DEVICE_MEMORY) { printf("[ERR][PROP.0] out of device memory\n");}
+    }
+    for( int i = 0; i != c_PropertyCount; i++) {
+        printf("[Layer %03d]\n", i);
+        printf("Name: %s\n", c_VkLayerProperties[i].layerName); 
+        printf("Vulkan version the layer was written to: "); c_printVulkanVersion(c_VkLayerProperties[i].specVersion); printf("\n");
+        printf("Version of layer: %d\n", c_VkLayerProperties[i].implementationVersion);
+        printf("Description: %s\n", c_VkLayerProperties[i].description);
+        printf("\n");
+    }
+
+
+
+    // vkCreateInstance.pCreateInfo.pApplicationInfo
+
+
+    // vkCreateInstance.pCreateInfo
+    /*
+    VkInstanceCreateInfo c_VkInstanceCreateInfo;
+    tmp.sType = ;
+    tmp.pNext = nullptr;
+    tmp.flags = ;
+    tmp.pApplication.info'
+    */
+
+
+
+
+
 
 
 
